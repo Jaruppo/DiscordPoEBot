@@ -5,15 +5,19 @@ import json
 import os
 from dotenv import load_dotenv
 
-load_dotenv()  # loads DISCORD_TOKEN from .env
+# Load token
+load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", intents=intents)
 
+# Define file path
+ITEMS_FILE = os.path.join(os.path.dirname(__file__), "items.json")
+
 # Load existing items
-if os.path.exists("items.json"):
-	with open("items.json", "r") as f:
+if os.path.exists(ITEMS_FILE):
+	with open(ITEMS_FILE, "r") as f:
 		items = json.load(f)
 else:
 	items = []
@@ -33,8 +37,8 @@ async def need(interaction: discord.Interaction, item: str):
 	user = interaction.user.name
 	items.append({"user": user, "item": item})
 
-	# Save
-	with open("items.json", "w") as f:
+	# Save to file
+	with open(ITEMS_FILE, "w") as f:
 		json.dump(items, f, indent=2)
 
 	await interaction.response.send_message(f"{user} needs **{item}**!")
@@ -45,6 +49,6 @@ async def list_items(interaction: discord.Interaction):
 		await interaction.response.send_message("No items in the list.")
 		return
 	msg = "\n".join([f"{i+1}. {entry['user']} needs {entry['item']}" for i, entry in enumerate(items)])
-	await interaction.response.send_message(msg)
 
+# Start the bot
 bot.run(TOKEN)
